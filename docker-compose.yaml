@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+
+  superset-init:
+    image: apache/incubator-superset
+    container_name: superset_init
+    # command: ["/etc/superset/docker-init.sh"]
+    env_file: config/.env
+    # user: "root"
+    # volumes:
+    #   - superset-volume:/etc/superset
+    # environment:
+    #   - SUPERSET_CONFIG_PATH=/etc/superset/superset_config.py
+
+  superset:
+    env_file: config/.env
+    image: apache/incubator-superset
+    container_name: superset_app
+    command: ["/etc/superset/docker-bootstrap.sh", "app"]
+    restart: unless-stopped
+    ports:
+      - 8060:8088
+    user: "root"
+    depends_on:
+      - superset-init
+    volumes:
+      - superset-volume:/etc/superset
+    environment:
+      - SUPERSET_CONFIG_PATH=/etc/superset/superset_config.py
+
+volumes:
+  superset-volume:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ~/guidehouse/superset/config
